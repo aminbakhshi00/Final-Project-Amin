@@ -1,2 +1,7 @@
 Data/*
 !Data/.gitkeep
+OLD
+*.pt
+*.pdf
+*.pyc
+__pycache__/

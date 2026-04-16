@@ -1,0 +1,58 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+\title{Final Project Report Addendum: Label Handling and Ignore Logic}
+\author{Semantic Segmentation Project}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section*{Goal of Label Conversion}
+The model is trained with \texttt{NUM\_CLASSES = 20}, so valid trainable labels are only in the range \texttt{0..19}. Raw Cityscapes \texttt{labelIds} include additional class ids outside that range, so we normalize labels before computing loss.
+
+\section*{Current Mapping Rule (Implemented)}
+We use this rule in \texttt{convert\_label()}:
+\begin{verbatim}
+label[(label >= num_classes) & (label != ignore_index)] = ignore_index
+\end{verbatim}
+with:
+\begin{itemize}
+    \item \texttt{num\_classes = 20}
+    \item \texttt{ignore\_index = 255}
+\end{itemize}
+
+This means:
+\begin{enumerate}
+    \item Labels \texttt{0..19} are kept as trainable classes.
+    \item Labels \texttt{>= 20} are mapped to \texttt{255} and treated as ignored pixels.
+\end{enumerate}
+
+\section*{Why This Is Cleaner}
+Compared to forcing unknown labels into a normal class, this approach avoids training the model with incorrect supervision for out-of-range categories. Unknown categories are simply excluded from optimization.
+
+\section*{Loss Function Behavior}
+Training uses:
+\begin{verbatim}
+criterion = nn.CrossEntropyLoss(ignore_index=255)
+\end{verbatim}
+So pixels labeled \texttt{255} do not contribute to gradients.
+
+\section*{mIoU Behavior With Ignore Pixels}
+Our mIoU computation first masks out ignored pixels (\texttt{target == 255}) before intersection/union is computed. Therefore:
+\begin{itemize}
+    \item ignored pixels do not affect per-class IoU,
+    \item mIoU reflects only the supervised class range \texttt{0..19}.
+\end{itemize}
+
+\section*{Discussion Summary}
+\begin{itemize}
+    \item We still need \texttt{convert\_label()} because raw labels contain ids outside the model class range.
+    \item We do not directly use every raw label id for training in this simplified setup.
+    \item The new rule is more consistent: out-of-range labels are ignored, not reassigned to a trainable class.
+    \item mIoU remains useful for comparing models in this pipeline because it is computed with the same ignore policy.
+\end{itemize}
+
+\end{document}
