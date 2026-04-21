@@ -1,6 +1,7 @@
-# Run directly from main directory: python3 src/train.py
+# Run directly from main directory: python3 src/train_vgg16.py
 # ==================================================================
 import torch.nn as nn
+from torchvision import models
 
 from cityscapes_data import IGNORE_INDEX
 from train_helpers import run_training_pipeline
@@ -9,45 +10,42 @@ from train_helpers import run_training_pipeline
 DATA_ROOT = "Data"
 SPLIT = "train"
 NUM_CLASSES = 20
+USE_PRETRAINED = True
 
-BATCH_SIZE = 95
+BATCH_SIZE = 40
 EPOCHS = 15
 LEARNING_RATE = 1e-4
 NUM_WORKERS = 4
 
 SKIP_TRAIN = False
-MODEL_SAVE_PATH = "simple.pt"
+MODEL_SAVE_PATH = "vgg16.pt"
 
-OUTPUT_DIR = "outputs/simple"
+OUTPUT_DIR = "outputs/vgg16"
 VISUALIZE_SAMPLES = 3
 EVAL_SAMPLES = 100
-SAMPLE_PREFIX = "simple"
+SAMPLE_PREFIX = "vgg16"
 
 
-class SimpleCNN(nn.Module):
-    def __init__(self, num_classes):
-        super(SimpleCNN, self).__init__()
+class VGG16(nn.Module):
+    def __init__(self, num_classes, use_pretrained=False):
+        super(VGG16, self).__init__()
 
-        self.encoder = nn.Sequential(
-            nn.Conv2d(3, 32, kernel_size=3, padding=1),
-            nn.BatchNorm2d(32),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(32, 64, 3, padding=1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(64, 128, 3, padding=1),
-            nn.BatchNorm2d(128),
-            nn.ReLU(),
-        )
+        weights = models.VGG16_BN_Weights.DEFAULT if use_pretrained else None
+        vgg_pretrained = models.vgg16_bn(weights=weights)
+
+        features = list(vgg_pretrained.features.children())
+        self.encoder = nn.Sequential(*features[:33])
 
         self.decoder = nn.Sequential(
+            nn.ConvTranspose2d(512, 256, 2, stride=2),
+            nn.ReLU(),
+            nn.ConvTranspose2d(256, 128, 2, stride=2),
+            nn.ReLU(),
             nn.ConvTranspose2d(128, 64, 2, stride=2),
             nn.ReLU(),
-            nn.ConvTranspose2d(64, 32, 2, stride=2),
+            nn.Conv2d(64, 64, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.Conv2d(32, num_classes, 1),
+            nn.Conv2d(64, num_classes, kernel_size=1),
         )
 
     def forward(self, x):
@@ -57,7 +55,7 @@ class SimpleCNN(nn.Module):
 
 
 run_training_pipeline(
-    model=SimpleCNN(NUM_CLASSES),
+    model=VGG16(NUM_CLASSES, use_pretrained=USE_PRETRAINED),
     data_root=DATA_ROOT,
     split=SPLIT,
     num_classes=NUM_CLASSES,
