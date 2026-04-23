@@ -80,4 +80,4 @@ class SegNetDialated(nn.Module):
         return self.final(x7)
 
 
-run_training_pipeline(SegNetDialated(), model_name="segnet_dialated")
+run_training_pipeline(SegNetDialated(), model_name="segnet_dialated",batch_size=3)

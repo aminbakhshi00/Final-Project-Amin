@@ -80,4 +80,4 @@ class SegNet(nn.Module):
         return self.final(x7)
 
 
-run_training_pipeline(SegNet(), model_name="segnet")
+run_training_pipeline(SegNet(), model_name="segnet", batch_size=3)
