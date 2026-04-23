@@ -137,10 +137,10 @@ def visualize_predictions(model, dataset, save_dir, sample_prefix, num_samples=3
 def run_training_pipeline(
     model,
     model_name,
-    batch_size=30,
-    epochs=15,
+    batch_size,
+    epochs=20,
     learning_rate=1e-4,
-    num_workers=4,
+    num_workers=2,
     skip_train=False,
     data_root=DATA_ROOT,
     eval_samples=100,

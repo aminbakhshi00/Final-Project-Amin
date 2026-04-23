@@ -26,4 +26,4 @@ class VGG16(nn.Module):
         return self.decoder(self.encoder(x))
 
 
-run_training_pipeline(VGG16(), model_name="vgg16")
+run_training_pipeline(VGG16(), model_name="vgg16",batch_size=2)

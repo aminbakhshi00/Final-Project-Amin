@@ -23,4 +23,4 @@ class LRASPPDialated(nn.Module):
         return self.model(x)["out"]
 
 
-run_training_pipeline(LRASPPDialated(), model_name="lraspp_dialated")
+run_training_pipeline(LRASPPDialated(), model_name="lraspp_dialated",batch_size=5)

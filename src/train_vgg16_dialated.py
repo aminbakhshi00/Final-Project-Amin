@@ -33,4 +33,4 @@ class VGG16Dialated(nn.Module):
         return self.decoder(self.encoder(x))
 
 
-run_training_pipeline(VGG16Dialated(), model_name="vgg16_dialated")
+run_training_pipeline(VGG16Dialated(), model_name="vgg16_dialated",batch_size=2)

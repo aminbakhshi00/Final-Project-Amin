@@ -32,4 +32,4 @@ class SimpleCNN(nn.Module):
         return self.decoder(self.encoder(x))
 
 
-run_training_pipeline(SimpleCNN(), model_name="simple")
+run_training_pipeline(SimpleCNN(), model_name="simple",batch_size=6)

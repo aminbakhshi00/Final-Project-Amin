@@ -18,4 +18,4 @@ class LRASPP(nn.Module):
         return self.model(x)["out"]
 
 
-run_training_pipeline(LRASPP(), model_name="lraspp")
+run_training_pipeline(LRASPP(), model_name="lraspp",batch_size=5)

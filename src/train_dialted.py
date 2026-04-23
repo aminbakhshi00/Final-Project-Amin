@@ -33,4 +33,4 @@ class DilatedCNN(nn.Module):
         return self.decoder(self.encoder(x))
 
 
-run_training_pipeline(DilatedCNN(), model_name="dialted")
+run_training_pipeline(DilatedCNN(), model_name="dialted",batch_size=6)
