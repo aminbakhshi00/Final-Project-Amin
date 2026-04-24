@@ -1,0 +1,324 @@
+================================================================================
+python3 src/train.py
+================================================================================
+Epoch 1: train=1.8040 val=1.2207
+Saved model to simple.pt
+Epoch 2: train=1.1617 val=1.1306
+Saved model to simple.pt
+Epoch 3: train=1.0892 val=1.1066
+Saved model to simple.pt
+Epoch 4: train=1.0399 val=1.0659
+Saved model to simple.pt
+Epoch 5: train=1.0089 val=1.0459
+Saved model to simple.pt
+Epoch 6: train=0.9868 val=1.0113
+Saved model to simple.pt
+Epoch 7: train=0.9708 val=1.0024
+Saved model to simple.pt
+Epoch 8: train=0.9615 val=0.9967
+Saved model to simple.pt
+Epoch 9: train=0.9474 val=0.9816
+Saved model to simple.pt
+Epoch 10: train=0.9392 val=0.9734
+Saved model to simple.pt
+Epoch 11: train=0.9292 val=0.9777
+Epoch 12: train=0.9243 val=0.9661
+Saved model to simple.pt
+Epoch 13: train=0.9154 val=0.9796
+Epoch 14: train=0.9085 val=0.9571
+Saved model to simple.pt
+Epoch 15: train=0.9054 val=0.9393
+Saved model to simple.pt
+Epoch 16: train=0.9004 val=0.9441
+Epoch 17: train=0.8951 val=0.9377
+Saved model to simple.pt
+Epoch 18: train=0.8924 val=0.9410
+Epoch 19: train=0.8895 val=0.9375
+Saved model to simple.pt
+Epoch 20: train=0.8821 val=0.9396
+Mean IoU over 100 samples: 0.2047
+
+================================================================================
+python3 src/train_dialted.py
+================================================================================
+Epoch 1: train=1.8000 val=1.1806
+Saved model to dialted.pt
+Epoch 2: train=1.0806 val=1.0206
+Saved model to dialted.pt
+Epoch 3: train=0.9796 val=0.9577
+Saved model to dialted.pt
+Epoch 4: train=0.9230 val=1.0048
+Epoch 5: train=0.8883 val=0.9350
+Saved model to dialted.pt
+Epoch 6: train=0.8638 val=0.8868
+Saved model to dialted.pt
+Epoch 7: train=0.8389 val=0.8686
+Saved model to dialted.pt
+Epoch 8: train=0.8246 val=0.8737
+Epoch 9: train=0.8156 val=0.8656
+Saved model to dialted.pt
+Epoch 10: train=0.8024 val=0.9353
+Epoch 11: train=0.7940 val=0.8384
+Saved model to dialted.pt
+Epoch 12: train=0.7902 val=0.8404
+Epoch 13: train=0.7852 val=0.8492
+Epoch 14: train=0.7776 val=0.8250
+Saved model to dialted.pt
+Epoch 15: train=0.7705 val=0.8053
+Saved model to dialted.pt
+Epoch 16: train=0.7656 val=0.7965
+Saved model to dialted.pt
+Epoch 17: train=0.7619 val=0.7979
+Epoch 18: train=0.7553 val=0.8012
+Epoch 19: train=0.7521 val=0.7899
+Saved model to dialted.pt
+Epoch 20: train=0.7467 val=0.7963
+Mean IoU over 100 samples: 0.2331
+
+================================================================================
+python3 src/train_vgg16.py
+================================================================================
+Epoch 1: train=1.1531 val=1.0082
+Saved model to vgg16.pt
+Epoch 2: train=0.8092 val=0.8368
+Saved model to vgg16.pt
+Epoch 3: train=0.6579 val=0.8040
+Saved model to vgg16.pt
+Epoch 4: train=0.5981 val=0.7848
+Saved model to vgg16.pt
+Epoch 5: train=0.5530 val=0.6657
+Saved model to vgg16.pt
+Epoch 6: train=0.5105 val=0.6072
+Saved model to vgg16.pt
+Epoch 7: train=0.4801 val=0.5606
+Saved model to vgg16.pt
+Epoch 8: train=0.4604 val=0.5604
+Saved model to vgg16.pt
+Epoch 9: train=0.4417 val=0.5256
+Saved model to vgg16.pt
+Epoch 10: train=0.4205 val=0.4856
+Saved model to vgg16.pt
+Epoch 11: train=0.4084 val=0.4700
+Saved model to vgg16.pt
+Epoch 12: train=0.3937 val=0.4636
+Saved model to vgg16.pt
+Epoch 13: train=0.3845 val=0.4433
+Saved model to vgg16.pt
+Epoch 14: train=0.3700 val=0.4329
+Saved model to vgg16.pt
+Epoch 15: train=0.3605 val=0.4592
+Epoch 16: train=0.3500 val=0.4310
+Saved model to vgg16.pt
+Epoch 17: train=0.3424 val=0.4241
+Saved model to vgg16.pt
+Epoch 18: train=0.3336 val=0.4292
+Epoch 19: train=0.3281 val=0.3991
+Saved model to vgg16.pt
+Epoch 20: train=0.3220 val=0.4300
+Mean IoU over 100 samples: 0.4209
+
+================================================================================
+python3 src/train_vgg16_dialated.py
+================================================================================
+Epoch 1: train=1.0767 val=0.8606
+Saved model to vgg16_dialated.pt
+Epoch 2: train=0.6744 val=0.6872
+Saved model to vgg16_dialated.pt
+Epoch 3: train=0.5574 val=0.6048
+Saved model to vgg16_dialated.pt
+Epoch 4: train=0.5020 val=0.5222
+Saved model to vgg16_dialated.pt
+Epoch 5: train=0.4657 val=0.5410
+Epoch 6: train=0.4365 val=0.4913
+Saved model to vgg16_dialated.pt
+Epoch 7: train=0.4113 val=0.4583
+Saved model to vgg16_dialated.pt
+Epoch 8: train=0.3882 val=0.5549
+Epoch 9: train=0.3699 val=0.4263
+Saved model to vgg16_dialated.pt
+Epoch 10: train=0.3527 val=0.3868
+Saved model to vgg16_dialated.pt
+Epoch 11: train=0.3369 val=0.3978
+Epoch 12: train=0.3245 val=0.3585
+Saved model to vgg16_dialated.pt
+Epoch 13: train=0.3140 val=0.3776
+Epoch 14: train=0.3032 val=0.4316
+Epoch 15: train=0.2927 val=0.3665
+Epoch 16: train=0.2861 val=0.3408
+Saved model to vgg16_dialated.pt
+Epoch 17: train=0.2756 val=0.3402
+Saved model to vgg16_dialated.pt
+Epoch 18: train=0.2725 val=0.3630
+Epoch 19: train=0.2624 val=0.3476
+Epoch 20: train=0.2579 val=0.3163
+Saved model to vgg16_dialated.pt
+Mean IoU over 100 samples: 0.4261
+
+================================================================================
+python3 src/train_segnet.py
+================================================================================
+Epoch 1: train=1.6286 val=1.1374
+Saved model to segnet.pt
+Epoch 2: train=0.9385 val=0.8989
+Saved model to segnet.pt
+Epoch 3: train=0.7839 val=0.8019
+Saved model to segnet.pt
+Epoch 4: train=0.7136 val=0.7217
+Saved model to segnet.pt
+Epoch 5: train=0.6685 val=0.7016
+Saved model to segnet.pt
+Epoch 6: train=0.6405 val=0.6543
+Saved model to segnet.pt
+Epoch 7: train=0.6123 val=0.6750
+Epoch 8: train=0.5944 val=0.7008
+Epoch 9: train=0.5809 val=0.6380
+Saved model to segnet.pt
+Epoch 10: train=0.5633 val=0.6139
+Saved model to segnet.pt
+Epoch 11: train=0.5494 val=0.6217
+Epoch 12: train=0.5406 val=0.6396
+Epoch 13: train=0.5301 val=0.5946
+Saved model to segnet.pt
+Epoch 14: train=0.5197 val=0.5725
+Saved model to segnet.pt
+Epoch 15: train=0.5116 val=0.6125
+Epoch 16: train=0.5053 val=0.5524
+Saved model to segnet.pt
+Epoch 17: train=0.4996 val=0.5711
+Epoch 18: train=0.4950 val=0.5501
+Saved model to segnet.pt
+Epoch 19: train=0.4879 val=0.5464
+Saved model to segnet.pt
+Epoch 20: train=0.4820 val=0.5406
+Saved model to segnet.pt
+Mean IoU over 100 samples: 0.3315
+
+================================================================================
+python3 src/train_segnet_dialated.py
+================================================================================
+Epoch 1: train=1.5610 val=1.0639
+Saved model to segnet_dialated.pt
+Epoch 2: train=0.8698 val=0.7956
+Saved model to segnet_dialated.pt
+Epoch 3: train=0.7105 val=0.6982
+Saved model to segnet_dialated.pt
+Epoch 4: train=0.6384 val=0.6768
+Saved model to segnet_dialated.pt
+Epoch 5: train=0.5942 val=0.6468
+Saved model to segnet_dialated.pt
+Epoch 6: train=0.5568 val=0.5996
+Saved model to segnet_dialated.pt
+Epoch 7: train=0.5318 val=0.5971
+Saved model to segnet_dialated.pt
+Epoch 8: train=0.5119 val=0.5833
+Saved model to segnet_dialated.pt
+Epoch 9: train=0.4967 val=0.5499
+Saved model to segnet_dialated.pt
+Epoch 10: train=0.4828 val=0.5425
+Saved model to segnet_dialated.pt
+Epoch 11: train=0.4696 val=0.5083
+Saved model to segnet_dialated.pt
+Epoch 12: train=0.4553 val=0.4923
+Saved model to segnet_dialated.pt
+Epoch 13: train=0.4456 val=0.5021
+Epoch 14: train=0.4387 val=0.4701
+Saved model to segnet_dialated.pt
+Epoch 15: train=0.4304 val=0.4954
+Epoch 16: train=0.4215 val=0.4633
+Saved model to segnet_dialated.pt
+Epoch 17: train=0.4166 val=0.4511
+Saved model to segnet_dialated.pt
+Epoch 18: train=0.4090 val=0.4932
+Epoch 19: train=0.4030 val=0.4682
+Epoch 20: train=0.3961 val=0.4806
+Mean IoU over 100 samples: 0.3484
+
+================================================================================
+python3 src/train_lraspp.py
+================================================================================
+Epoch 1: train=0.9619 val=1.4085
+Saved model to lraspp.pt
+Epoch 2: train=0.5696 val=0.5872
+Saved model to lraspp.pt
+Epoch 3: train=0.4864 val=0.5186
+Saved model to lraspp.pt
+Epoch 4: train=0.4313 val=0.4511
+Saved model to lraspp.pt
+Epoch 5: train=0.3979 val=0.4528
+Epoch 6: train=0.3699 val=0.4257
+Saved model to lraspp.pt
+Epoch 7: train=0.3488 val=0.4268
+Epoch 8: train=0.3294 val=0.4086
+Saved model to lraspp.pt
+Epoch 9: train=0.3150 val=0.3806
+Saved model to lraspp.pt
+Epoch 10: train=0.2993 val=0.3473
+Saved model to lraspp.pt
+Epoch 11: train=0.2885 val=0.3486
+Epoch 12: train=0.2767 val=0.3515
+Epoch 13: train=0.2681 val=0.3376
+Saved model to lraspp.pt
+Epoch 14: train=0.2597 val=0.3262
+Saved model to lraspp.pt
+Epoch 15: train=0.2504 val=0.3347
+Epoch 16: train=0.2433 val=0.3243
+Saved model to lraspp.pt
+Epoch 17: train=0.2347 val=0.3186
+Saved model to lraspp.pt
+Epoch 18: train=0.2274 val=0.3110
+Saved model to lraspp.pt
+Epoch 19: train=0.2217 val=0.3269
+Epoch 20: train=0.2149 val=0.3238
+Mean IoU over 100 samples: 0.3846
+
+================================================================================
+python3 src/train_lraspp_dialated.py
+================================================================================
+Epoch 1: train=0.9743 val=1.3873
+Saved model to lraspp_dialated.pt
+Epoch 2: train=0.5896 val=0.5923
+Saved model to lraspp_dialated.pt
+Epoch 3: train=0.5129 val=0.5245
+Saved model to lraspp_dialated.pt
+Epoch 4: train=0.4631 val=0.4833
+Saved model to lraspp_dialated.pt
+Epoch 5: train=0.4259 val=0.4661
+Saved model to lraspp_dialated.pt
+Epoch 6: train=0.4002 val=0.4567
+Saved model to lraspp_dialated.pt
+Epoch 7: train=0.3753 val=0.4180
+Saved model to lraspp_dialated.pt
+Epoch 8: train=0.3604 val=0.4124
+Saved model to lraspp_dialated.pt
+Epoch 9: train=0.3410 val=0.4162
+Epoch 10: train=0.3255 val=0.3936
+Saved model to lraspp_dialated.pt
+Epoch 11: train=0.3145 val=0.3873
+Saved model to lraspp_dialated.pt
+Epoch 12: train=0.3008 val=0.3762
+Saved model to lraspp_dialated.pt
+Epoch 13: train=0.2927 val=0.3674
+Saved model to lraspp_dialated.pt
+Epoch 14: train=0.2840 val=0.3690
+Epoch 15: train=0.2768 val=0.3571
+Saved model to lraspp_dialated.pt
+Epoch 16: train=0.2691 val=0.3488
+Saved model to lraspp_dialated.pt
+Epoch 17: train=0.2581 val=0.3526
+Epoch 18: train=0.2522 val=0.3651
+Epoch 19: train=0.2456 val=0.3403
+Saved model to lraspp_dialated.pt
+Epoch 20: train=0.2380 val=0.3445
+Mean IoU over 100 samples: 0.3658
+
+================================================================================
+RUN SUMMARY
+================================================================================
+Model: simple.pt, Mean IoU: 0.2047
+Model: dialted.pt, Mean IoU: 0.2331
+Model: vgg16.pt, Mean IoU: 0.4209
+Model: vgg16_dialated.pt, Mean IoU: 0.4261
+Model: segnet.pt, Mean IoU: 0.3315
+Model: segnet_dialated.pt, Mean IoU: 0.3484
+Model: lraspp.pt, Mean IoU: 0.3846
+Model: lraspp_dialated.pt, Mean IoU: 0.3658
