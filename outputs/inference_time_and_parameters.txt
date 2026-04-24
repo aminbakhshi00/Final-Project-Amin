@@ -1,0 +1,31 @@
+Model: simple.pt
+Number of parameters: 135,379
+Estimated inference time for 10 samples (seconds): 0.1969
+
+Model: dialted.pt
+Number of parameters: 135,379
+Estimated inference time for 10 samples (seconds): 0.1970
+
+Model: vgg16.pt
+Number of parameters: 8,367,379
+Estimated inference time for 10 samples (seconds): 1.0597
+
+Model: vgg16_dialated.pt
+Number of parameters: 8,367,379
+Estimated inference time for 10 samples (seconds): 1.0652
+
+Model: segnet.pt
+Number of parameters: 468,403
+Estimated inference time for 10 samples (seconds): 0.5819
+
+Model: segnet_dialated.pt
+Number of parameters: 468,403
+Estimated inference time for 10 samples (seconds): 0.6221
+
+Model: lraspp.pt
+Number of parameters: 3,221,198
+Estimated inference time for 10 samples (seconds): 0.1658
+
+Model: lraspp_dialated.pt
+Number of parameters: 3,221,198
+Estimated inference time for 10 samples (seconds): 0.1643
