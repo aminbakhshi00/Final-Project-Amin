@@ -55,4 +55,55 @@ Our mIoU computation first masks out ignored pixels (\texttt{target == 255}) bef
     \item mIoU remains useful for comparing models in this pipeline because it is computed with the same ignore policy.
 \end{itemize}
 
+\section*{Training History and mIoU Summary (from \texttt{outputs/histroy\_and\_miou.txt})}
+The training logs cover 8 models, each trained for 20 epochs. Across models, train/validation losses generally decrease over time with expected fluctuations, and checkpoints are saved whenever validation loss improves.
+
+Final mIoU on 100 validation samples:
+\begin{itemize}
+    \item \texttt{vgg16\_dialated.pt}: 0.4261 (best mIoU)
+    \item \texttt{vgg16.pt}: 0.4209
+    \item \texttt{lraspp.pt}: 0.3846
+    \item \texttt{lraspp\_dialated.pt}: 0.3658
+    \item \texttt{segnet\_dialated.pt}: 0.3484
+    \item \texttt{segnet.pt}: 0.3315
+    \item \texttt{dialted.pt}: 0.2331
+    \item \texttt{simple.pt}: 0.2047
+\end{itemize}
+
+Observed pattern: dilation improves Simple, VGG16, and SegNet variants, but does not improve LRASPP in this setup.
+
+\section*{Inference Time and Parameter Summary (from \texttt{outputs/inference\_time\_and\_parameters.txt})}
+Inference was measured on the original resolution (\texttt{1024x2048}) for 10 validation samples on CUDA.
+
+\begin{center}
+\small
+\begin{tabular}{|l|r|r|r|}
+\hline
+Model & mIoU & Parameters & Time for 10 samples (s) \\
+\hline
+\texttt{simple.pt} & 0.2047 & 135,379 & 0.1969 \\
+\texttt{dialted.pt} & 0.2331 & 135,379 & 0.1970 \\
+\texttt{vgg16.pt} & 0.4209 & 8,367,379 & 1.0597 \\
+\texttt{vgg16\_dialated.pt} & 0.4261 & 8,367,379 & 1.0652 \\
+\texttt{segnet.pt} & 0.3315 & 468,403 & 0.5819 \\
+\texttt{segnet\_dialated.pt} & 0.3484 & 468,403 & 0.6221 \\
+\texttt{lraspp.pt} & 0.3846 & 3,221,198 & 0.1658 \\
+\texttt{lraspp\_dialated.pt} & 0.3658 & 3,221,198 & 0.1643 \\
+\hline
+\end{tabular}
+\end{center}
+
+\section*{Why LRASPP Has the Best Inference Time}
+The measured best inference time is from \texttt{lraspp\_dialated.pt} (0.1643s for 10 samples), followed by \texttt{lraspp.pt} (0.1658s). This is faster than \texttt{simple.pt}/\texttt{dialted.pt} (about 0.197s), even though LRASPP has many more parameters (3.22M vs 0.135M).
+
+This happens because parameter count and runtime are not equivalent:
+\begin{itemize}
+    \item Runtime is dominated by actual compute and memory movement at each feature-map size, not only by total weights.
+    \item LRASPP (MobileNetV3-based) relies heavily on efficient depthwise-separable operations and early downsampling, which reduces high-resolution computation.
+    \item The Simple/Dialted models use regular dense convolutions on large spatial maps, which can cost more compute per pixel even with far fewer parameters.
+    \item On GPU, optimized kernels for MobileNet-style operators can further reduce latency.
+\end{itemize}
+
+So in this project, LRASPP gives a strong speed/accuracy trade-off: much faster inference than Simple/Dialted while achieving substantially higher mIoU.
+
 \end{document}
