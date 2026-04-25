@@ -1,7 +1,7 @@
 Data/*
 !Data/.gitkeep
 OLD
-*.pt
+
 
 *.pyc
 __pycache__/
