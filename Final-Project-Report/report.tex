@@ -1,109 +1,257 @@
 \documentclass[12pt]{article}
+
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath}
+\usepackage{array}
+\usepackage{graphicx}
 \usepackage{hyperref}
 
-\title{Final Project Report Addendum: Label Handling and Ignore Logic}
-\author{Semantic Segmentation Project}
-\date{\today}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    citecolor=blue
+}
 
+\title{Semantic Segmentation with Dilated Networks for Autonomous Driving}
+\author{Mohammadamin Alibakhshi\\Deep Learning class, 5743, Professor Hagan\\Spring 2026}
+\date{}
 \begin{document}
 \maketitle
+\section{Introduction}
+Semantic segmentation is the task of assigning a class label to every pixel in an image. In autonomous driving, this is important because the vehicle must understand where the road, sidewalk, vehicles, pedestrians, signs, and other scene parts are located. This is different from image classification, where one label is predicted for the whole image, and it is also different from object detection, where boxes are placed around objects. Semantic segmentation gives a dense prediction, so it is more directly connected to driving scene understanding.
 
-\section*{Goal of Label Conversion}
-The model is trained with \texttt{NUM\_CLASSES = 20}, so valid trainable labels are only in the range \texttt{0..19}. Raw Cityscapes \texttt{labelIds} include additional class ids outside that range, so we normalize labels before computing loss.
+The motivation of this project came from the tradeoff between accuracy and computation. Standard convolutional networks use pooling and strided operations to reduce feature-map size. This is useful for computation, but it can remove spatial detail that is needed for pixel-level prediction. Dilated convolution, also called atrous convolution, increases the receptive field by inserting gaps between kernel points. In this way, the model can see a larger context without adding more weights to the convolution kernel. This means using a larger kernel size with the same computational cost. 
 
-\section*{Current Mapping Rule (Implemented)}
-We use this rule in \texttt{convert\_label()}:
-\begin{verbatim}
-label[(label >= num_classes) & (label != ignore_index)] = ignore_index
-\end{verbatim}
-with:
-\begin{itemize}
-    \item \texttt{num\_classes = 20}
-    \item \texttt{ignore\_index = 255}
-\end{itemize}
+The main project question was:
+\begin{quote}
+Does dilation improve semantic segmentation performance across different architectures, and what is the cost in runtime?
+\end{quote}
 
-This means:
-\begin{enumerate}
-    \item Labels \texttt{0..19} are kept as trainable classes.
-    \item Labels \texttt{>= 20} are mapped to \texttt{255} and treated as ignored pixels.
-\end{enumerate}
+The project started from the proposal idea of comparing a basic CNN and a dilated CNN. After the baseline was working, the experiment was expanded to VGG16, SegNet-style, and LRASPP models, so the effect of dilation could be tested more broadly.
 
-\section*{Why This Is Cleaner}
-Compared to forcing unknown labels into a normal class, this approach avoids training the model with incorrect supervision for out-of-range categories. Unknown categories are simply excluded from optimization.
+\section{Original proposal direction}
+The proposal defined the project as semantic segmentation with dilated CNNs for autonomous driving. It planned to use Cityscapes images and fine annotations, build a simple CNN baseline, modify the model with dilated convolutions, and evaluate the result with mIoU and visual prediction examples. The final implementation followed this direction but went further by adding six more models.
 
-\section*{Loss Function Behavior}
-Training uses:
-\begin{verbatim}
-criterion = nn.CrossEntropyLoss(ignore_index=255)
-\end{verbatim}
-So pixels labeled \texttt{255} do not contribute to gradients.
+The expected challenge from the proposal was that segmentation is more expensive than classification because every pixel must be labeled. This became clear in the implementation because Cityscapes images have resolution $3 \times 1024 \times 2048$, and the batch size had to be kept small for larger models. Although I do not have direct evidence of classification vs. semantic segmentation, training these 8 semantic segmentation networks, four families with and without dilation, took a total of 24 hours. Another expected challenge was that a simple model may miss small objects and boundaries. The visual predictions not only back this up, but we also see a lot of misclassification in the form of noise in the final images, which I didn't expect from a simple CNN, see \autoref{fig:presentation_samples}.
 
-\section*{mIoU Behavior With Ignore Pixels}
-Our mIoU computation first masks out ignored pixels (\texttt{target == 255}) before intersection/union is computed. Therefore:
-\begin{itemize}
-    \item ignored pixels do not affect per-class IoU,
-    \item mIoU reflects only the supervised class range \texttt{0..19}.
-\end{itemize}
+\section{Dataset}
+The dataset used in this project is Cityscapes \cite{cityscapes}. The code uses TorchVision's Cityscapes dataset class. The predefined Cityscapes fine split contains 2,975 training images and 500 validation images. The input images are left-camera from "{leftImg8bit}", and the labels are semantic fine annotations from "{gtFine}".
 
-\section*{Discussion Summary}
-\begin{itemize}
-    \item We still need \texttt{convert\_label()} because raw labels contain ids outside the model class range.
-    \item We do not directly use every raw label id for training in this simplified setup.
-    \item The new rule is more consistent: out-of-range labels are ignored, not reassigned to a trainable class.
-    \item mIoU remains useful for comparing models in this pipeline because it is computed with the same ignore policy.
-\end{itemize}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.35\linewidth]{Deep_learning_Final_project/Final_figs/Dialated.png}
+    \caption{Dilated convolution increases the receptive field without increasing the number of kernel weights. This idea was the main architectural change studied in the project.}
+    \label{fig:dilated}
+\end{figure}
 
-\section*{Training History and mIoU Summary (from \texttt{outputs/histroy\_and\_miou.txt})}
-The training logs cover 8 models, each trained for 20 epochs. Across models, train/validation losses generally decrease over time with expected fluctuations, and checkpoints are saved whenever validation loss improves.
-
-Final mIoU on 100 validation samples:
-\begin{itemize}
-    \item \texttt{vgg16\_dialated.pt}: 0.4261 (best mIoU)
-    \item \texttt{vgg16.pt}: 0.4209
-    \item \texttt{lraspp.pt}: 0.3846
-    \item \texttt{lraspp\_dialated.pt}: 0.3658
-    \item \texttt{segnet\_dialated.pt}: 0.3484
-    \item \texttt{segnet.pt}: 0.3315
-    \item \texttt{dialted.pt}: 0.2331
-    \item \texttt{simple.pt}: 0.2047
-\end{itemize}
-
-Observed pattern: dilation improves Simple, VGG16, and SegNet variants, but does not improve LRASPP in this setup.
-
-\section*{Inference Time and Parameter Summary (from \texttt{outputs/inference\_time\_and\_parameters.txt})}
-Inference was measured on the original resolution (\texttt{1024x2048}) for 10 validation samples on CUDA.
+\section{Label mapping and ignore label}
+The current code does not train directly on raw Cityscapes label ids. By default, Cityscapes has over 30 finely annotated classes, but we only trained on 19 of them. Regarding implementation, "dataloader.py" creates a train id lookup table from "torchvision.datasets.Cityscapes.classes". The model output has 19 channels, one for each valid Cityscapes training class. All other labels are mapped to 255 and ignored. The ignored label is "{255}". This is cleaner than forcing unknown or void categories into a normal class, because those pixels do not represent reliable supervision for one of the 19 classes.
 
 \begin{center}
 \small
-\begin{tabular}{|l|r|r|r|}
+\begin{tabular}{|c|l||c|l|}
 \hline
-Model & mIoU & Parameters & Time for 10 samples (s) \\
+\textbf{Train ID} & \textbf{Class} & \textbf{Train ID} & \textbf{Class} \\
 \hline
-\texttt{simple.pt} & 0.2047 & 135,379 & 0.1969 \\
-\texttt{dialted.pt} & 0.2331 & 135,379 & 0.1970 \\
-\texttt{vgg16.pt} & 0.4209 & 8,367,379 & 1.0597 \\
-\texttt{vgg16\_dialated.pt} & 0.4261 & 8,367,379 & 1.0652 \\
-\texttt{segnet.pt} & 0.3315 & 468,403 & 0.5819 \\
-\texttt{segnet\_dialated.pt} & 0.3484 & 468,403 & 0.6221 \\
-\texttt{lraspp.pt} & 0.3846 & 3,221,198 & 0.1658 \\
-\texttt{lraspp\_dialated.pt} & 0.3658 & 3,221,198 & 0.1643 \\
+0 & road & 10 & sky \\
+1 & sidewalk & 11 & person \\
+2 & building & 12 & rider \\
+3 & wall & 13 & car \\
+4 & fence & 14 & truck \\
+5 & pole & 15 & bus \\
+6 & traffic light & 16 & train \\
+7 & traffic sign & 17 & motorcycle \\
+8 & vegetation & 18 & bicycle \\
+9 & terrain & 255 & ignored pixels \\
 \hline
 \end{tabular}
 \end{center}
 
-\section*{Why LRASPP Has the Best Inference Time}
-The measured best inference time is from \texttt{lraspp\_dialated.pt} (0.1643s for 10 samples), followed by \texttt{lraspp.pt} (0.1658s). This is faster than \texttt{simple.pt}/\texttt{dialted.pt} (about 0.197s), even though LRASPP has many more parameters (3.22M vs 0.135M).
+Training uses cross entropy as the loss function with the same ignore policy "CrossEntropyLoss(ignore index=255)." The mIoU function also first removes ignored pixels. Hence, IoU is computed for classes 0 through 18. Therefore, the loss and the evaluation metric are consistent with each other.
 
-This happens because parameter count and runtime are not equivalent:
-\begin{itemize}
-    \item Runtime is dominated by actual compute and memory movement at each feature-map size, not only by total weights.
-    \item LRASPP (MobileNetV3-based) relies heavily on efficient depthwise-separable operations and early downsampling, which reduces high-resolution computation.
-    \item The Simple/Dialted models use regular dense convolutions on large spatial maps, which can cost more compute per pixel even with far fewer parameters.
-    \item On GPU, optimized kernels for MobileNet-style operators can further reduce latency.
-\end{itemize}
+\section{Models' specifications}
+Eight models were trained. Four are baseline models and four are dilated versions. The goal was not to reproduce a state-of-the-art Cityscapes benchmark but to compare the effect of dilation inside an isolated training pipeline.
 
-So in this project, LRASPP gives a strong speed/accuracy trade-off: much faster inference than Simple/Dialted while achieving substantially higher mIoU.
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{|p{0.19\linewidth}|p{0.48\linewidth}|p{0.2\linewidth}|}
+\hline
+\textbf{Model} & \textbf{Implementation summary} & \textbf{Batch size} \\
+\hline
+Simple CNN & Custom encoder-decoder with three convolution blocks, two max-pooling layers, two transposed convolutions, and a final 19-channel classifier. & 6 \\
+\hline
+Dilated Simple CNN & Same structure as Simple CNN, but the three encoder convolutions use dilation 4 and padding 4.& 6 \\
+\hline
+VGG16 & TorchVision vgg16 feature layers up to layer 33; the decoder is manually added and uses three transposed convolutions and two final convolutions. & 2 \\
+\hline
+VGG16 Dilated & Same VGG16-style encoder-decoder, but each 3 by 3 encoder convolution uses dilation 2 and padding 2 to keep the output size consistent. & 2 \\
+\hline
+SegNet-style & Manual SegNet-inspired encoder-decoder with skip concatenations. The middle block uses dilation 2. & 3 \\
+\hline
+SegNet Dilated & Same SegNet-style structure, but most 3 by 3 convolution layers use dilation 4 and padding 4. & 3 \\
+\hline
+LRASPP\cite{mobilenetv3} & TorchVision LRASPP with a MobileNetV3-Large backbone. The code uses no pretrained weights and sets the output to 19 classes. & 5 \\
+\hline
+LRASPP Dilated & Same LRASPP model, but non-$1 \times 1$ backbone convolutions are changed to dilation 2. & 5 \\
+\hline
+\end{tabular}
+\end{center}
+
+
+\section{Training and evaluation pipeline}
+All models use the shared pipeline in "{helper.py}". The main steps are:
+\begin{enumerate}
+    \item Load Cityscapes training and validation splits.
+    \item Convert images to tensors and map raw labels to train IDs.
+    \item Train with CrossEntropyLoss function with ignore index=255.
+    \item Optimize with Adam using learning rate $10^{-4}$. (This has remained consistent across all eight models.)
+    \item Train for 20 epochs. (This was also consistent across all eight models, but I only saved the best model when the validation loss was reduced.)
+    \item Reload the best model.
+    \item Evaluate mIoU on the first 100 validation samples.
+    \item Save three qualitative prediction.
+\end{enumerate}
+
+\section{Evaluation metric}
+Mean Intersection over Union is the main quantitative metric. For class $c$, IoU is:
+\[
+\text{IoU}_c = \frac{TP_c}{TP_c + FP_c + FN_c}
+\]
+where $TP_c$ is true positives, $FP_c$ is false positives, and $FN_c$ is false negatives for class $c$. The mean IoU is the average over the 19 trainable classes:
+\[
+\text{mIoU} = \frac{1}{19}\sum_{c=0}^{18}\text{IoU}_c
+\]
+To avoid dividing by zero, if a class is missing from both the target and prediction for a sample, the class IoU is skipped (for example, "vegetation" or "fence" classes are not present in all images).
+
+\section{Training history summary}
+The training logs in text files in the output folder show that the training and validation losses generally decreased for all models. The larger models reached lower validation losses, especially the VGG16 Dilated and LRASPP models. The table below reports the final epoch losses, the best validation checkpoint, and the final mIoU evaluation.
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.2}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{|l|r|r|r|r|r|}
+\hline
+\textbf{Model} & \textbf{Epoch 20 train} & \textbf{Epoch 20 val} & \textbf{Best epoch} & \textbf{Best val} & \textbf{mIoU} \\
+\hline
+{Simple} & 0.8821 & 0.9396 & 19 & 0.9375 & 0.2047 \\
+{Simple Dilated} & 0.7467 & 0.7963 & 19 & 0.7899 & 0.2331 \\
+{VGG16} & 0.3220 & 0.4300 & 19 & 0.3991 & 0.4209 \\
+{VGG16 Dilated} & 0.2579 & 0.3163 & 20 & 0.3163 & 0.4261 \\
+{SegNet} & 0.4820 & 0.5406 & 20 & 0.5406 & 0.3315 \\
+{SegNet Dilated} & 0.3961 & 0.4806 & 17 & 0.4511 & 0.3484 \\
+{LRASPP} & 0.2149 & 0.3238 & 18 & 0.3110 & 0.3846 \\
+{LRASPP Dilated} & 0.2380 & 0.3445 & 19 & 0.3403 & 0.3658 \\
+\hline
+\end{tabular}
+}
+\end{center}
+
+\section{mIoU results}
+The final mIoU values:
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{|l|r|l|r|r|}
+\hline
+\textbf{Family} & \textbf{Base mIoU} & \textbf{Dilated model} & \textbf{Dilated mIoU} & \textbf{Delta} \\
+\hline
+Simple & 0.2047 & Simple Dilated & 0.2331 & \textbf{ +0.0284} \\
+VGG16 & 0.4209 & VGG16 Dilated & \textbf{0.4261} & +0.0052 \\
+SegNet & 0.3315 & SegNet Dilated & 0.3484 & +0.0169 \\
+LRASPP & 0.3846 & LRASPP Dilated & 0.3658 & \textbf{$-$}0.0188 \\
+\hline
+\end{tabular}
+\end{center}
+
+The best model by mIoU was vgg16 dilated version, with 0.4261. Dilation improved three of the four architecture families: Simple, VGG16, and SegNet. The largest absolute improvement was for the Simple CNN family, where mIoU increased from 0.2047 to 0.2331. However, dilation did not improve LRASPP in this implementation. I can justify this by stating that the segmentation head already uses the optimal number of dilations, and that adding dilation to the encoder backbone was unnecessary and had a negative impact on final performance.
+
+\section{Inference time and number of parameters}
+The timing and parameter logs are avilable in the text files in outputs folder. Timing was measured for 10 full-resolution validation samples.
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.25}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{|l|r|r|r|}
+\hline
+\textbf{Model} & \textbf{mIoU} & \textbf{Parameters} & \textbf{Time for 10 samples (s)} \\
+\hline
+{Simple} & 0.2047 & 135,379 & 0.1969 \\
+{Simple Dilated} & 0.2331 & 135,379 & 0.1970 \\
+{VGG16} & 0.4209 & 8,367,379 & 1.0597 \\
+{VGG16 Dilated} & 0.4261 & 8,367,379 & 1.0652 \\
+{SegNet} & 0.3315 & 468,403 & 0.5819 \\
+{SegNet Dilated} & 0.3484 & 468,403 & 0.6221 \\
+{LRASPP} & 0.3846 & 3,221,198 & 0.1658 \\
+{LRASPP Dilated} & 0.3658 & 3,221,198 & \textbf{0.1643} \\
+\hline
+\end{tabular}
+}
+\end{center}
+
+
+An important observation that I learned was that parameter count and runtime are not the same thing. LRASPP has 3.22 million parameters, much more than the Simple CNN, but it was still the fastest model in the timing test. This is because LRASPP is based on a MobileNetV3-style backbone and lightweight segmentation head. It reduces the size of high-resolution images in the network's encoder early on. The Simple CNN has fewer parameters, but it performs dense convolutions on large feature maps, which can be expensive per pixel.
+
+Dilation did not change the number of parameters within a model family because it changes the spacing of kernel samples, not the number of weights. Runtime changed only slightly for Simple and VGG16, increased for SegNet, and was slightly lower for LRASPP Dilated. The slight difference in timing can be explained by GPU measurement noise, and calling those layers to add dilation adds an additional overhead. 
+
+\section{Qualitative Results}
+The project also saved visual predictions for each model. As shown in the presentation, each output PDF is divided into three panels: input image, ground truth, and model prediction.
+The presentation used these examples to show that mIoU is useful but not perfect. A model can have a slightly better mIoU while still producing visually rough boundaries, or it can perform well on large classes but miss small objects.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=\linewidth]{Deep_learning_Final_project/Final_figs/vgg16_dialated_1.pdf}
+    \caption{Qualitative output from the best mIoU model, VGG16 Dilated}
+    \label{fig:vgg16_dilated_sample}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=\linewidth]{Deep_learning_Final_project/Final_figs/lraspp_1.pdf}
+    \caption{Qualitative output from LRASPP, which gave a strong speed and accuracy tradeoff.}
+    \label{fig:lraspp_sample}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[page=22,width=0.95\linewidth]{Deep_learning_Final_project/Final_figs/Final-Project-Presentation.pdf}
+    \caption{Sample comparison slide from the final presentation.}
+    \label{fig:presentation_samples}
+\end{figure}
+
+\clearpage
+
+\section{Discussion}
+The results show that dilation can help, but it is not automatically beneficial. In the Simple CNN, dilation increased mIoU by 0.0284. This makes sense because the model is shallow, so increasing the receptive field gives it more context. In the VGG16 family, the improvement was much smaller, only 0.0052. The VGG16-style encoder already has a larger capacity, so that might be the reason why the extra dilation helped less.
+
+The SegNet-style model also improved with dilation, from 0.3315 to 0.3484. This suggests that the skip-concatenation decoder can still benefit from a larger receptive field. However, it became slower, increasing from 0.5819 seconds to 0.6221 seconds for 10 samples, for which I am unable to fully explain. 
+
+LRASPP was different. The base LRASPP reached 0.3846 mIoU, but the dilated LRASPP reached 0.3658. This means the dilation strategy used here was not well tuned for LRASPP. LRASPP already has an atrous-style lightweight segmentation design, and changing many backbone convolutions to dilation 2 may disturb the backbone. What I learned was this atrous-style head for dilation, and I believe that the atrous-style head is one of the best for semantic segmentation strategies one can employ. This is one of the main lessons of the project: dilation should be chosen based on architecture and feature-map resolution, not applied everywhere in the same way. It depends on the size of the input images, whether they are reduced, and the network architecture.
+
+The strongest accuracy result came from VGG16 Dilated, but the strongest practical runtime result came from LRASPP. If the goal is highest mIoU in this project, VGG16 Dilated is the best. If the goal is speed with reasonable mIoU, LRASPP is more appealing because it is much faster than VGG16 while still achieving 0.3846 mIoU, and it can handle real-world self-driving car image segmentation much faster.
+
+\section{Limitations}
+Cityscapes mainly contains daytime urban driving scenes, so the models were not tested on night, heavy rain, fog, or unusual weather.\\
+mIoU provides an average number, but it can conceal poor performance in small or safety critical classes, such as pedestrians or bikes.
+
+
+\section{Conclusion}
+This project implemented a complete semantic segmentation pipeline for Cityscapes and compared baseline and dilated versions of four architecture families. The label handling was corrected to use the official Cityscapes train-id mapping, with 19 trainable classes and 255 as the ignore index.
+
+The main conclusion is that dilated convolutions improved three of four model families in this setup. The best final mIoU was achieved by VGG16 Dilated, with 0.4261. However, the fastest model was LRASPP Dilated, with 0.1643 seconds for 10 samples, and the best speed-accuracy compromise was the base LRASPP model, with 0.3846 mIoU and 0.1658 seconds for 10 samples.
+
+The project therefore supports the original proposal idea that dilation can help preserve context for segmentation, but it also shows that dilation must be matched to the architecture. Applying dilation broadly is not always better.
+
+
+\begin{thebibliography}{9}
+\bibitem{cityscapes}
+Marius Cordts et al. ``The Cityscapes Dataset for Semantic Urban Scene Understanding.'' CVPR, 2016.
+
+\bibitem{mobilenetv3}
+Andrew Howard et al. ``Searching for MobileNetV3.'' ICCV, 2019.
+\end{thebibliography}
 
 \end{document}
